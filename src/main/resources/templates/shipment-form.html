@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Оформление отгрузки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            padding: 30px;
+            color: #263247;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        input, select, button {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid #ccd2dc;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #2864dc;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        a {
+            color: #2864dc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Оформление отгрузки техники</h2>
+
+    <form th:action="@{/shipments/save}" method="post">
+
+        <label>Выберите технику:</label>
+        <select name="equipmentId" required>
+            <option value="">Выберите технику</option>
+            <option th:each="item : ${equipmentList}"
+                    th:value="${item.id}"
+                    th:text="${item.name + ' (остаток: ' + item.quantity + ')'}">
+            </option>
+        </select>
+
+        <label>Количество:</label>
+        <input type="number" name="quantity" min="1" required>
+
+        <label>Дата отгрузки:</label>
+        <input type="date" name="shipmentDate" required>
+
+        <button type="submit">Оформить отгрузку</button>
+    </form>
+
+    <a th:href="@{/equipment}">Вернуться на склад</a>
+</div>
+
+</body>
+</html>

@@ -1,74 +1,76 @@
-package ru.example.skladtehniki.service;
+package ru.example.skladtehniki.controller;
 
 import ru.example.skladtehniki.model.Equipment;
-import ru.example.skladtehniki.repository.EquipmentRepository;
-
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
+import ru.example.skladtehniki.service.EquipmentService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
-@Service
-public class EquipmentService {
+@Controller
+@RequestMapping("/equipment")
+public class EquipmentController {
 
-    private final EquipmentRepository repository;
+    private final EquipmentService equipmentService;
 
-    public EquipmentService(EquipmentRepository repository) {
-        this.repository = repository;
+    public EquipmentController(EquipmentService equipmentService) {
+        this.equipmentService = equipmentService;
     }
 
-    public List<Equipment> findAll(
-            String type,
-            LocalDate arrivalDate) {
+    @GetMapping
+    public String list(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String arrivalDate,
+            Model model) {
 
-        Specification<Equipment> spec =
-                (root, query, cb) -> cb.conjunction();
+        LocalDate date = null;
 
-        if (type != null && !type.isBlank()) {
-            String pattern = "%" + type.trim().toLowerCase() + "%";
-
-            spec = spec.and((root, query, cb) ->
-                    cb.like(
-                            cb.lower(root.get("type")),
-                            pattern
-                    ));
+        if (arrivalDate != null && !arrivalDate.isBlank()) {
+            date = LocalDate.parse(arrivalDate);
         }
 
-        if (arrivalDate != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(
-                            root.get("arrivalDate"),
-                            arrivalDate
-                    ));
-        }
-
-        Sort sort = Sort.by(
-                Sort.Order.asc("arrivalDate"),
-                Sort.Order.asc("type").ignoreCase()
+        model.addAttribute(
+                "equipmentList",
+                equipmentService.findAll(type, date)
         );
 
-        return repository.findAll(spec, sort);
+        model.addAttribute(
+                "totalCount",
+                equipmentService.countAll()
+        );
+
+        return "equipment";
     }
 
-    public long countAll() {
-        return repository.count();
+    @GetMapping("/new")
+    public String createForm(Model model) {
+        model.addAttribute("equipment", new Equipment());
+        return "equipment-form";
     }
 
-    public Equipment findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Техника не найдена"
-                        ));
+    @PostMapping("/save")
+    public String save(@ModelAttribute Equipment equipment) {
+        equipmentService.save(equipment);
+        return "redirect:/equipment";
     }
 
-    public Equipment save(Equipment equipment) {
-        return repository.save(equipment);
+    @GetMapping("/edit/{id}")
+    public String editForm(
+            @PathVariable Long id,
+            Model model) {
+
+        model.addAttribute(
+                "equipment",
+                equipmentService.findById(id)
+        );
+
+        return "equipment-form";
     }
 
-    public void delete(Long id) {
-        repository.deleteById(id);
+    @PostMapping("/delete/{id}")
+    public String delete(@PathVariable Long id) {
+        equipmentService.delete(id);
+        return "redirect:/equipment";
     }
 }

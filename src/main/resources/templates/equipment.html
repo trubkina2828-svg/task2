@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Склад магазина техники</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,9 +22,7 @@
             border-radius: 12px;
         }
 
-        h1 {
-            margin-top: 0;
-        }
+        h1 { margin-top: 0; }
 
         .top {
             display: flex;
@@ -44,9 +43,7 @@
             color: white;
         }
 
-        .delete {
-            background: #d94343;
-        }
+        .delete { background: #d94343; }
 
         .search {
             margin: 25px 0;
@@ -73,23 +70,38 @@
             text-align: left;
         }
 
-        th {
-            background: #edf1f8;
-        }
+        th { background: #edf1f8; }
 
         .empty {
             text-align: center;
             color: #777;
             padding: 25px;
         }
+
+        .chart-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 25px auto;
+        }
     </style>
 </head>
+
 <body>
 <div class="container">
 
     <div class="top">
         <h1>Склад магазина техники</h1>
-        <a th:href="@{/equipment/new}">+ Добавить технику</a>
+
+        <div>
+            <a th:href="@{/equipment/new}">
+                + Добавить технику
+            </a>
+
+            <a th:href="@{/shipments/new}"
+               style="background: #15965b; margin-left: 10px;">
+                Оформить отгрузку
+            </a>
+        </div>
     </div>
 
     <h3>
@@ -98,13 +110,12 @@
     </h3>
 
     <form class="search" method="get" th:action="@{/equipment}">
-        <input type="text" name="type"
-               placeholder="Тип техники">
+        <input type="text" name="type" placeholder="Тип техники">
 
-        <input type="date" name="arrivalDate"
-               placeholder="Дата поступления">
+        <input type="date" name="arrivalDate">
 
         <button type="submit">Найти</button>
+
         <a th:href="@{/equipment}">Сбросить</a>
     </form>
 
@@ -126,4 +137,110 @@
             <td th:text="${item.id}"></td>
             <td th:text="${item.name}"></td>
             <td th:text="${item.type}"></td>
-            <td th:text="${item.quantity}"></
+            <td th:text="${item.quantity}"></td>
+            <td th:text="${item.price}"></td>
+            <td th:text="${item.arrivalDate}"></td>
+
+            <td>
+                <a th:href="@{/equipment/edit/{id}(id=${item.id})}">
+                    Изменить
+                </a>
+
+                <form th:action="@{/equipment/delete/{id}(id=${item.id})}"
+                      method="post"
+                      style="display:inline;">
+
+                    <input type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+
+                    <button type="submit" class="delete">
+                        Удалить
+                    </button>
+                </form>
+            </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(equipmentList)}">
+            <td colspan="7" class="empty">
+                На складе пока нет техники
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <hr style="margin: 35px 0;">
+
+    <h2>Гистограмма отгрузок за последние 30 дней</h2>
+
+    <div class="chart-container">
+        <canvas id="shipmentChart"></canvas>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    fetch('/api/shipments/statistics')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Не удалось загрузить статистику');
+            }
+
+            return response.json();
+        })
+        .then(data => {
+            const labels = data.map(item => {
+                const parts = item.date.split('-');
+                return parts[2] + '.' + parts[1] + '.' + parts[0];
+            });
+            const quantities = data.map(item => item.quantity);
+
+            const ctx = document.getElementById('shipmentChart');
+
+            new Chart(ctx, {
+                type: 'bar',
+
+                data: {
+                    labels: labels,
+
+                    datasets: [{
+                        label: 'Количество отгруженной техники',
+                        data: quantities,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 1
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+
+                            title: {
+                                display: true,
+                                text: 'Количество'
+                            }
+                        },
+
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Дата'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки статистики:', error);
+        });
+</script>
+
+</body>
+</html>

@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public UserDetails userDetails(PasswordEncoder encoder) {
+    public InMemoryUserDetailsManager userDetails(PasswordEncoder encoder) {
         UserDetails admin = User.builder()
                 .username("admin")
                 .password(encoder.encode("admin123"))
