@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточка техники</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            padding: 30px;
+            color: #263247;
+        }
+
+        .container {
+            max-width: 550px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px;
+            border: 1px solid #ccd2dc;
+            border-radius: 6px;
+        }
+
+        button, a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 11px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #2864dc;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        a {
+            background: #777;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>Карточка техники</h1>
+
+    <form th:action="@{/equipment/save}"
+          th:object="${equipment}"
+          method="post">
+
+        <input type="hidden" th:field="*{id}">
+
+        <label>Название техники</label>
+        <input type="text" th:field="*{name}" required>
+
+        <label>Тип техники</label>
+        <input type="text" th:field="*{type}" required>
+
+        <label>Количество</label>
+        <input type="number" th:field="*{quantity}" min="0" required>
+
+        <label>Цена</label>
+        <input type="number" th:field="*{price}"
+               min="0" step="0.01" required>
+
+        <label>Дата поступления</label>
+        <input type="date" th:field="*{arrivalDate}" required>
+
+        <br>
+
+        <button type="submit">Сохранить</button>
+        <a th:href="@{/equipment}">Назад</a>
+
+    </form>
+
+</div>
+</body>
+</html>

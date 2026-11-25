@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход в систему</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 90vh;
+        }
+
+        .login-box {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            width: 320px;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccd2dc;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2864dc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>Вход на склад</h2>
+
+    <p class="error" th:if="${param.error}">
+        Неверный логин или пароль
+    </p>
+
+    <p class="success" th:if="${param.logout}">
+        Вы вышли из системы
+    </p>
+
+    <form th:action="@{/login}" method="post">
+        <input type="text" name="username"
+               placeholder="Логин" required>
+
+        <input type="password" name="password"
+               placeholder="Пароль" required>
+
+        <button type="submit">Войти</button>
+    </form>
+</div>
+
+</body>
+</html>
